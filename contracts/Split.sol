@@ -1,8 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.2 <0.9.0;
 
-import "@openzeppelin/contracts/utils/Strings.sol";
-
 contract Split {
     /**
      * Contract Data
@@ -28,17 +26,21 @@ contract Split {
         PAYED
     }
 
+    // TODO: Reeplace members version and member history with a list of debtors 
+    // TODO: Remove history of members and replace it with a mapping mto manage access and array to keep track of all the addresses
+
     struct Expense {
         Status status; //uint8
         uint32 membersVersion;
         uint128 creditorID;
         uint32 yesCount;
         uint32 noCount;
-        uint256 amount;
     }
 
-    mapping(uint256 => mapping(address => bool)) votes;
-    mapping(uint256 => mapping(address => uint256)) debts;
+    // Maps: groupID => expenseID => memberId => vote
+    mapping(uint128 =>  mapping (uint128 => mapping(address => bool))) votes;
+    // Maps: groupID => expenseID => memberId => debt
+    mapping(uint128 =>  mapping (uint128 => mapping(address => uint256))) debts;
 
     /**
      * Events
@@ -48,8 +50,10 @@ contract Split {
     event ExpenseCreated(
         uint128 groupId,
         uint128 expensesId,
+        uint256 amount,
         address creator,
-        string[3] info
+        string[3] info,
+        uint[] debts
     );
 
     mapping(uint128 => Expense[]) groupExpenses;
@@ -95,6 +99,20 @@ contract Split {
         return groupMemberHistorical[_groupId][_version - 1];
     }
 
+    function getGroupMembers(uint128 _groupId)
+        public
+        view
+        returns (address[] memory)
+    {
+        return getGroupMembersHistorical(_groupId, getMembersVersion(_groupId));
+    }
+
+    function getExpenseMembers(uint128 _groupdId, uint128 _expenseId) external view returns (address [] memory) {
+        uint expenseMembersVersion = groupExpenses[_groupdId][_expenseId - 1].membersVersion;
+        return groupMemberHistorical[_groupdId][expenseMembersVersion - 1];
+
+    }
+
     function isMember(uint128 _groupId, address member) public view returns (bool) {
         return groupMembers[_groupId][member] > 0;
     }
@@ -129,17 +147,7 @@ contract Split {
         uint256[] calldata _debts,
         string[3] calldata _info
     ) external onlyMember(_groupId) {
-        require(_debtors.length == _debts.length);
-
-        // Add the debt for each member
-        uint128 expensesId = uint128(groupExpenses[_groupId].length);
-        uint256 _amount = 0;
-        uint256 expensesUId = getExpensesUId(_groupId, expensesId);
-        for (uint256 pos = 0; pos < _debtors.length; pos++) {
-            uint256 debt = _debts[pos];
-            _amount += debt;
-            debts[expensesUId][_debtors[pos]] = debt;
-        }
+        require(_debtors.length == _debts.length, "The arrays must have the same size");
 
         // Add the expense to the expense list
         groupExpenses[_groupId].push(
@@ -148,12 +156,19 @@ contract Split {
                 membersVersion: getMembersVersion(_groupId),
                 creditorID: groupMembers[_groupId][msg.sender],
                 yesCount: 0,
-                noCount: 0,
-                amount: _amount
+                noCount: 0
             })
         );
+        // Add the debt for each member
+        uint128 expensesId = uint128(groupExpenses[_groupId].length);
+        uint256 _amount = 0;
+        for (uint256 pos = 0; pos < _debtors.length; pos++) {
+            uint256 debt = _debts[pos];
+            _amount += debt;
+            debts[_groupId][expensesId][_debtors[pos]] = debt;
+        }
 
         // Create a new event
-        emit ExpenseCreated(_groupId, expensesId, msg.sender, _info);
+        emit ExpenseCreated(_groupId, expensesId, _amount, msg.sender, _info, _debts);
     }
 }
