@@ -1,0 +1,256 @@
+{
+	"compiler": {
+		"version": "0.8.18+commit.87f61d96"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint32",
+						"name": "memberId",
+						"type": "uint32"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "image",
+						"type": "string"
+					}
+				],
+				"name": "ExpenseCreated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint128",
+						"name": "GroupID",
+						"type": "uint128"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "image",
+						"type": "string"
+					}
+				],
+				"name": "GroupCreated",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint128",
+						"name": "_groupId",
+						"type": "uint128"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address[]",
+						"name": "_debtors",
+						"type": "address[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "_debts",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"name": "addExpense",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "balances",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address[]",
+						"name": "_groupMembers",
+						"type": "address[]"
+					},
+					{
+						"internalType": "string",
+						"name": "_name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "_description",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "_image",
+						"type": "string"
+					}
+				],
+				"name": "createGroup",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "groupCount",
+				"outputs": [
+					{
+						"internalType": "uint128",
+						"name": "",
+						"type": "uint128"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint128",
+						"name": "",
+						"type": "uint128"
+					}
+				],
+				"name": "groups",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/Split.sol": "Split"
+		},
+		"evmVersion": "paris",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts/utils/Strings.sol": {
+			"keccak256": "0x3088eb2868e8d13d89d16670b5f8612c4ab9ff8956272837d8e90106c59c14a0",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://b81d9ff6559ea5c47fc573e17ece6d9ba5d6839e213e6ebc3b4c5c8fe4199d7f",
+				"dweb:/ipfs/QmPCW1bFisUzJkyjroY3yipwfism9RRCigCcK1hbXtVM8n"
+			]
+		},
+		"@openzeppelin/contracts/utils/math/Math.sol": {
+			"keccak256": "0xe4455ac1eb7fc497bb7402579e7b4d64d928b846fce7d2b6fde06d366f21c2b3",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://cc8841b3cd48ad125e2f46323c8bad3aa0e88e399ec62acb9e57efa7e7c8058c",
+				"dweb:/ipfs/QmSqE4mXHA2BXW58deDbXE8MTcsL5JSKNDbm23sVQxRLPS"
+			]
+		},
+		"@openzeppelin/contracts/utils/math/SignedMath.sol": {
+			"keccak256": "0xf92515413956f529d95977adc9b0567d583c6203fc31ab1c23824c35187e3ddc",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://c50fcc459e49a9858b6d8ad5f911295cb7c9ab57567845a250bf0153f84a95c7",
+				"dweb:/ipfs/QmcEW85JRzvDkQggxiBBLVAasXWdkhEysqypj9EaB6H2g6"
+			]
+		},
+		"contracts/Split.sol": {
+			"keccak256": "0x6785fa8e62e8ed633ce914f69fce1bc292b14f7c83bab7e91fa16e66214eb9cd",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://176579e0c49e6ec9d49fa6e51aa52b0f786655b33c7cf8daee4178dd8c0eb4b1",
+				"dweb:/ipfs/QmRg2nTFfwHS4WELKTPtLgxH2K3CZm4u3bcBrVrASDESbU"
+			]
+		}
+	},
+	"version": 1
+}
