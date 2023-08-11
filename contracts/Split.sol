@@ -15,8 +15,7 @@ contract Split {
 
     uint128 public groupCount;
     mapping(uint128 => Group) public groups;
-    mapping(uint128 => mapping(address => uint128)) public groupMembers;
-    mapping(uint128 => address[][]) public groupMemberHistorical;
+    mapping(uint128 => mapping(address => bool)) public groupMembers;
 
     // Expenses
     enum Status {
@@ -26,15 +25,15 @@ contract Split {
         PAYED
     }
 
-    // TODO: Reeplace members version and member history with a list of debtors 
+    // TODO: Reeplace members version and member history with a list of debtors
     // TODO: Remove history of members and replace it with a mapping mto manage access and array to keep track of all the addresses
 
     struct Expense {
         Status status; //uint8
-        uint32 membersVersion;
-        uint128 creditorID;
+        address creditor;
         uint32 yesCount;
         uint32 noCount;
+        address[] debtors;
     }
 
     // Maps: groupID => expenseID => memberId => vote
@@ -53,6 +52,7 @@ contract Split {
         uint256 amount,
         address creator,
         string[3] info,
+        address[] debtors,
         uint[] debts
     );
 
@@ -76,45 +76,8 @@ contract Split {
     constructor() {}
 
     // Utilities
-    function getExpensesUId(uint128 _groupId, uint128 _expensePosition)
-        internal
-        pure
-        returns (uint256)
-    {
-        return uint256(_groupId)**128 + _expensePosition;
-    }
-
-    /**
-     * View functions
-     **/
-    function getMembersVersion(uint128 _groupId) public view returns (uint32) {
-        return uint32(groupMemberHistorical[_groupId].length);
-    }
-
-    function getGroupMembersHistorical(uint128 _groupId, uint256 _version)
-        public
-        view
-        returns (address[] memory)
-    {
-        return groupMemberHistorical[_groupId][_version - 1];
-    }
-
-    function getGroupMembers(uint128 _groupId)
-        public
-        view
-        returns (address[] memory)
-    {
-        return getGroupMembersHistorical(_groupId, getMembersVersion(_groupId));
-    }
-
-    function getExpenseMembers(uint128 _groupdId, uint128 _expenseId) external view returns (address [] memory) {
-        uint expenseMembersVersion = groupExpenses[_groupdId][_expenseId - 1].membersVersion;
-        return groupMemberHistorical[_groupdId][expenseMembersVersion - 1];
-
-    }
-
     function isMember(uint128 _groupId, address member) public view returns (bool) {
-        return groupMembers[_groupId][member] > 0;
+        return groupMembers[_groupId][member];
     }
 
     /**
@@ -128,14 +91,12 @@ contract Split {
         // Groups Id range from 1 to group count
         groupCount++;
         groups[groupCount] = Group(msg.sender);
-        groupMemberHistorical[groupCount] = [_groupMembers];
-        // Members Id range from 1 to members array length
         for (
             uint32 memberId = 1;
             memberId <= _groupMembers.length;
             memberId++
         ) {
-            groupMembers[groupCount][_groupMembers[memberId - 1]] = memberId;
+            groupMembers[groupCount][_groupMembers[memberId - 1]] = true;
         }
         emit GroupCreated(groupCount, msg.sender, _info);
     }
@@ -147,16 +108,24 @@ contract Split {
         uint256[] calldata _debts,
         string[3] calldata _info
     ) external onlyMember(_groupId) {
+        // Check _debtors and _debts format
         require(_debtors.length == _debts.length, "The arrays must have the same size");
-
+        for (uint256 pos = 0; pos < _debtors.length; pos++) {
+            // Check that the sender is not one of the debtors
+            require(_debtors[pos] != msg.sender, "You can't be a debtor in one of your expenses");
+            // Check that all debtors are members in the group
+            require(isMember(_groupId, _debtors[pos]), "All the debtors must be members of the group");
+            // Check that all the debts are greater than 0 
+            require(_debts[pos] > 0);
+        }
         // Add the expense to the expense list
         groupExpenses[_groupId].push(
             Expense({
                 status: Status.CREATED, //uint8
-                membersVersion: getMembersVersion(_groupId),
-                creditorID: groupMembers[_groupId][msg.sender],
+                creditor: msg.sender,
                 yesCount: 0,
-                noCount: 0
+                noCount: 0,
+                debtors: _debtors
             })
         );
         // Add the debt for each member
@@ -169,6 +138,6 @@ contract Split {
         }
 
         // Create a new event
-        emit ExpenseCreated(_groupId, expensesId, _amount, msg.sender, _info, _debts);
+        emit ExpenseCreated(_groupId, expensesId, _amount, msg.sender, _info, _debtors, _debts);
     }
 }
